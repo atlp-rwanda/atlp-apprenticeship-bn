@@ -1,3 +1,26 @@
+ ####web 
  previewsEnabled: true
+previewsExpireAfterDays: 3
 services:
 - type: web
+  plan: standard
+  name: express-server
+  runtime: node
+  buildCommand: 
+  startCommand: npm run dev
+  envVars:
+  - key:  
+    value:  
+    previewValue:  
+  - key:  
+    fromDatabase:
+      name:  
+      property:  
+ 
+      ###databases
+databases:
+- name:  
+  databaseName:  
+  user:  
+  plan:  
+  previewPlan: 
