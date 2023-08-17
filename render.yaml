@@ -1,0 +1,4 @@
+deployKeys:
+  preview:
+    prefix: pr
+    branch: true
