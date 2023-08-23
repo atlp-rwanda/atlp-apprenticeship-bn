@@ -1,0 +1,40 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: actions/setup-docker@v2
+        with:
+          docker-version: '20.10.8'
+
+      - name: Log in to DigitalOcean Container Registry
+        run: echo ${{ secrets.DOCR_PASSWORD }} | docker login -u ${{ secrets.DOCR_USERNAME }} --password-stdin registry.digitalocean.com
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t registry.digitalocean.com/atlp-devpulse/your-image:$GITHUB_SHA .
+          docker push registry.digitalocean.com/atlp-devpulse/your-image:$GITHUB_SHA
+
+      - name: SSH into DigitalOcean Droplet
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          script: |
+            docker login registry.digitalocean.com -u ${{ secrets.DOCR_USERNAME }} -p ${{ secrets.DOCR_PASSWORD }}
+            docker pull registry.digitalocean.com/atlp-devpulse/your-image:$GITHUB_SHA
+            docker stop your-container-name || true
+            docker rm your-container-name || true
+            docker run -d --name your-container-name -p 80:80 registry.digitalocean.com/atlp-devpulse/your-image:$GITHUB_SHA
