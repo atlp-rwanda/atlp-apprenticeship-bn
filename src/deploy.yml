@@ -1,0 +1,51 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: actions/setup-docker@v2
+        with:
+          docker-version: '20.10.8'
+
+      - name: Log in to DigitalOcean Container Registry
+        run: |
+          echo ${{ secrets.DOCR_PASSWORD }} | docker login -u ${{ secrets.DOCR_USERNAME }} --password-stdin registry.digitalocean.com
+        env:
+          DOCR_PASSWORD: ${{ secrets.DOCR_PASSWORD }}
+          DOCR_USERNAME: ${{ secrets.DOCR_USERNAME }}
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t your-image-name:latest .
+          docker tag your-image-name:latest registry.digitalocean.com/your-registry/your-image-name:latest
+        working-directory: ./path/to/your/dockerfile/directory
+
+      - name: Push Docker image to DigitalOcean Container Registry
+        run: |
+          docker push registry.digitalocean.com/your-registry/your-image-name:latest
+        working-directory: ./path/to/your/dockerfile/directory
+
+      - name: Deploy to DigitalOcean Kubernetes Cluster
+        run: |
+          # Use kubectl or another tool to apply your Kubernetes manifests
+          # Example: kubectl apply -f ./path/to/your/kubernetes/manifests
+          echo "Deployment commands here..."
+        working-directory: ./path/to/your/kubernetes/manifests
+
+      - name: Clean up
+        run: |
+          docker logout registry.digitalocean.com
+        env:
+          DOCKER_CONFIG: /github/home/.docker
+
