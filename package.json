@@ -7,7 +7,16 @@
     "start": "tsc && node dist/index",
     "dev": "nodemon src/index.ts",
     "test": "tsc && nyc mocha",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "build": "tsc",
+    "lint:fix": "eslint . --fix",
+    "precommit": "lint-staged",
+    "check-types": "tsc --pretty --noEmit",
+    "check-format": "prettier --check .",
+    "check-lint": "eslint . --ext ts --ext tsx --ext js",
+    "format": "prettier --write .",
+    "test-all": "npm run check-format && npm run check-lint && npm run check-types && npm run build",
+    "prepare": "husky install"
   },
   "mocha": {
     "extension": [
@@ -48,8 +57,7 @@
     "apollo-server": "^3.9.0",
     "express": "^4.18.1",
     "graphql": "^16.5.0",
-    "nodemon": "^3.0.1",
-    "typescript": "^5.1.6"
+    "nodemon": "^3.0.1"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
@@ -60,9 +68,26 @@
     "assert": "^2.0.0",
     "chai": "^4.2.0",
     "eslint": "^7.8.1",
+    "eslint-config-prettier": "^9.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
+    "prettier": "^3.0.2",
     "source-map-support": "^0.5.19",
-    "ts-node": "^9.0.0"
+    "ts-node": "^9.0.0",
+    "typescript": "^5.2.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npm run lint:fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
+ 
 }
